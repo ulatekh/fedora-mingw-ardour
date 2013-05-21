@@ -311,7 +311,7 @@ index 8da2613..53af747 100644
 +        os_incdir = ['../windows']
      for example_program, example_program_source in list(example_programs.items()):
          if example_program == 'jack_server_control':
-             use = ['serverlib']
+             use = ['serverlib', 'STDC++']
 @@ -121,6 +123,8 @@ def build(bld):
              prog.use += ['RT', 'SNDFILE']
          if bld.env['IS_SUN']:

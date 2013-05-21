@@ -133,9 +133,9 @@ index 807e5e2..cb8152f 100644
          netlib.includes = includes
          netlib.name         = 'netlib'
          netlib.target       = 'jacknet'
--        netlib.use = ['SAMPLERATE', 'CELT', 'PTHREAD' , 'RT']
+-        netlib.use = ['SAMPLERATE', 'CELT', 'OPUS', 'PTHREAD' , 'RT']
 -        netlib.install_path = '${LIBDIR}'
-+        netlib.use = ['SAMPLERATE', 'CELT', 'PTHREAD']
++        netlib.use = ['SAMPLERATE', 'CELT', 'OPUS', 'PTHREAD']
 +        if bld.env['IS_WINDOWS']:
 +             netlib.install_path = '${BINDIR}'
 +             netlib.use += ['WS2_32', 'WINMM']
@@ -181,7 +181,7 @@ index 807e5e2..cb8152f 100644
 +         clientlib.install_path = '${BINDIR}'
 +    else:
 +         clientlib.install_path = '${LIBDIR}'
-     if bld.env['BUILD_JACKDBUS'] == True and bld.env['BUILD_JACKD'] == False:
+     if bld.env['AUTOSTART_METHOD'] == "dbus":
          clientlib.use.append('DBUS-1')
      clientlib.includes = includes
 @@ -255,6 +305,14 @@ def build(bld):
@@ -311,15 +311,18 @@ index d9cad01..d6a7fd7 100644
      opt.add_option('--classic', action='store_true', default=False, help='Force enable standard JACK (jackd) even if D-Bus JACK (jackdbus) is enabled too')
      opt.add_option('--doxygen', action='store_true', default=False, help='Enable build of doxygen documentation')
      opt.add_option('--profile', action='store_true', default=False, help='Build with engine profiling')
-@@ -76,13 +77,18 @@ def options(opt):
+@@ -76,6 +77,8 @@ def options(opt):
      opt.add_option('--firewire', action='store_true', default=False, help='Enable FireWire driver (FFADO)')
      opt.add_option('--freebob', action='store_true', default=False, help='Enable FreeBob driver')
      opt.add_option('--alsa', action='store_true', default=False, help='Enable ALSA driver')
 +    opt.add_option('--portaudio', action='store_true', default=False, help='Enable Portaudio driver')
 +    opt.add_option('--winmme', action='store_true', default=False, help='Enable WinMME driver')
+     opt.add_option('--autostart', type='string', default="default", help='Autostart method. Possible values: "default", "classic", "dbus", "none"')
      opt.sub_options('dbus')
  
- def configure(conf):
+@@ -83,9 +86,13 @@ def options(opt):
+     conf.load('compiler_cxx')
+     conf.load('compiler_cc')
      platform = sys.platform
 -    conf.env['IS_MACOSX'] = platform == 'darwin'
 -    conf.env['IS_LINUX'] = platform == 'linux' or platform == 'linux2' or platform == 'posix'
@@ -330,9 +333,10 @@ index d9cad01..d6a7fd7 100644
 +        conf.env['IS_SUN'] = platform == 'sunos'
 +    elif Options.options.dist_target == 'mingw':
 +        conf.env['IS_WINDOWS'] = True
- 
-     if conf.env['IS_LINUX']:
-         Logs.pprint('CYAN', "Linux detected")
++
+     # GNU/kFreeBSD and GNU/Hurd are treated as Linux
+     if platform.startswith('gnu0') or platform.startswith('gnukfreebsd'):
+         conf.env['IS_LINUX'] = True
 @@ -93,6 +99,9 @@ def configure(conf):
      if conf.env['IS_SUN']:
          Logs.pprint('CYAN', "SunOS detected")
@@ -355,7 +359,7 @@ index d9cad01..d6a7fd7 100644
 +        conf.env.append_unique('CXXDEFINES', '_POSIX')
   
      conf.env.append_unique('CXXFLAGS', '-Wall')
-     conf.env.append_unique('CCFLAGS', '-Wall')
+     conf.env.append_unique('CFLAGS', '-Wall')
 @@ -125,6 +140,11 @@ def configure(conf):
          conf.env['BUILD_DRIVER_ALSA'] = Options.options.alsa
          conf.env['BUILD_DRIVER_FFADO'] = Options.options.firewire
@@ -375,7 +379,7 @@ index d9cad01..d6a7fd7 100644
 +    conf.env['BINDIR'] = conf.env['PREFIX'] + '/bin'
 +
      if Options.options.libdir:
-         conf.env['LIBDIR'] = conf.env['PREFIX'] + Options.options.libdir
+         conf.env['LIBDIR'] = Options.options.libdir
      else:
 @@ -203,10 +225,20 @@ def configure(conf):
      conf.define('CLIENT_NUM', Options.options.clients)

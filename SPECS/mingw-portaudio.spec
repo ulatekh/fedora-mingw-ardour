@@ -1,14 +1,14 @@
 %{?mingw_package_header}
 	
 %global mingw_build_win32 1
-%global mingw_build_win64 0
+%global mingw_build_win64 1
 
 %global mingw_pkg_name portaudio
 
 Summary:       Free, cross platform, open-source, audio I/O library
 Name:          mingw-portaudio
 Version:       19
-Release:       2%{?dist}
+Release:       16%{?dist}
 License:       MIT
 Group:         System Environment/Libraries
 URL:           http://www.portaudio.com/
@@ -16,6 +16,10 @@ URL:           http://www.portaudio.com/
 Source:        pa_snapshot.tgz
 Patch1:        portaudio-doxynodate.patch
 Patch2:        portaudio-pkgconfig-alsa.patch
+# Add some extra API needed by audacity
+# http://audacity.googlecode.com/svn/audacity-src/trunk/lib-src/portmixer/portaudio.patch
+Patch3:         portaudio-audacity.patch
+Patch4:        portaudio-mingw.patch
 BuildRoot:     %{_tmppath}/%{name}-%{version}-%{release}-root
 
 BuildArch:     noarch
@@ -28,6 +32,9 @@ BuildRequires: mingw32-gcc-c++
 BuildRequires: mingw64-gcc-c++
 BuildRequires: mingw32-binutils
 BuildRequires: mingw64-binutils
+# Circular dependency?
+#BuildRequires: mingw32-jack-audio-connection-kit
+#BuildRequires: mingw64-jack-audio-connection-kit
 
 BuildRequires: pkgconfig
 
@@ -60,6 +67,22 @@ support of audio. It uses a callback mechanism to request audio processing.
 Audio can be generated in various formats, including 32 bit floating point,
 and will be converted to the native format internally.
 
+%package -n mingw32-%{mingw_pkg_name}-cxx
+Summary:        Static cross compiled version of the portaudio library
+Requires:       mingw32-%{mingw_pkg_name} = %{version}-%{release}
+Group:          Development/Libraries
+
+%description -n mingw32-%{mingw_pkg_name}-cxx
+C++ interfaces for the portaudio library.
+
+%package -n mingw64-%{mingw_pkg_name}-cxx
+Summary:        Static cross compiled version of the portaudio library
+Requires:       mingw64-%{mingw_pkg_name} = %{version}-%{release}
+Group:          Development/Libraries
+
+%description -n mingw64-%{mingw_pkg_name}-cxx
+C++ interfaces for the portaudio library.
+
 %package -n mingw32-%{mingw_pkg_name}-static
 Summary:        Static cross compiled version of the portaudio library
 Requires:       mingw32-%{mingw_pkg_name} = %{version}-%{release}
@@ -84,12 +107,30 @@ Static cross compiled version of the portaudio library.
 %setup -q -n portaudio
 %patch1 -p1
 #%patch2 -p1
+%patch3 -p1
+%patch4 -p1
+# For both patch3 and aarch64 support
+autoreconf -i -f
 
 
 %build
 # can't build static lib....?
-%mingw_configure --enable-shared --disable-static --with-winapi=wmme,directx
-%mingw_make %{?_smp_mflags}
+rm -rf build_win32
+mkdir build_win32
+pushd build_win32
+%mingw32_configure --enable-shared --disable-static --enable-cxx \
+	--with-winapi=wmme,directx \
+	--with-dxdir=%{mingw32_prefix}
+%mingw32_make
+popd
+rm -rf build_win64
+mkdir build_win64
+pushd build_win64
+%mingw64_configure --enable-shared --disable-static --enable-cxx \
+	--with-winapi=wmme,directx \
+	--with-dxdir=%{mingw64_prefix}
+%mingw64_make
+popd
 
 
 %install
@@ -97,7 +138,7 @@ Static cross compiled version of the portaudio library.
 
 # no .la, please
 find $RPM_BUILD_ROOT%{mingw32_libdir} -name '*.la' -delete
-#find $RPM_BUILD_ROOT%{mingw64_libdir} -name '*.la' -delete
+find $RPM_BUILD_ROOT%{mingw64_libdir} -name '*.la' -delete
 
 
 %files -n mingw32-%{mingw_pkg_name}
@@ -107,12 +148,22 @@ find $RPM_BUILD_ROOT%{mingw32_libdir} -name '*.la' -delete
 %{mingw32_bindir}/libportaudio-2.dll
 %{mingw32_libdir}/libportaudio.dll.a
 
-#%files -n mingw64-%{mingw_pkg_name}
-#%doc LICENSE.txt README.txt
-#%{mingw64_includedir}/portaudio.h
-#%{mingw64_libdir}/pkgconfig/*.pc
-#%{mingw64_bindir}/libportaudio-2.dll
-#%{mingw64_libdir}/libportaudio.dll.a
+%files -n mingw64-%{mingw_pkg_name}
+%doc LICENSE.txt README.txt
+%{mingw64_includedir}/portaudio.h
+%{mingw64_libdir}/pkgconfig/*.pc
+%{mingw64_bindir}/libportaudio-2.dll
+%{mingw64_libdir}/libportaudio.dll.a
+
+%files -n mingw32-%{mingw_pkg_name}-cxx
+%{mingw32_bindir}/libportaudiocpp-0.dll
+%{mingw32_includedir}/portaudiocpp/*.hxx
+%{mingw32_libdir}/libportaudiocpp.dll.a
+
+%files -n mingw64-%{mingw_pkg_name}-cxx
+%{mingw64_bindir}/libportaudiocpp-0.dll
+%{mingw64_includedir}/portaudiocpp/*.hxx
+%{mingw64_libdir}/libportaudiocpp.dll.a
 
 %files -n mingw32-%{mingw_pkg_name}-static
 #%{mingw32_libdir}/libportaudio.a
@@ -121,6 +172,9 @@ find $RPM_BUILD_ROOT%{mingw32_libdir} -name '*.la' -delete
 #%{mingw64_libdir}/libportaudio.a
 
 %changelog
+* Tue May 21 2013 Steven Boswell <ulatekh@yahoo.com> - 19-16
+- Got 64-bit working
+
 * Sun Jul 1 2012 Tim Mayberry <mojofunk@gmail.com> - 19-2
 - Update spec to Fedora 17 package guidelines
 - Disable 64 bit build due to link errors
