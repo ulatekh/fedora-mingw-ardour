@@ -1,5 +1,5 @@
 --- portaudio-orig/bindings/cpp/bin/Makefile.am	2011-03-02 10:03:23.000000000 -0700
-+++ portaudio/bindings/cpp/bin/Makefile.am	2013-05-16 12:48:18.683283367 -0700
++++ portaudio/bindings/cpp/bin/Makefile.am	2013-05-21 21:24:40.008815725 -0700
 @@ -1,9 +1,9 @@
  BINDIR = $(top_srcdir)/example
  LIBDIR = $(top_builddir)/lib
@@ -13,7 +13,7 @@
 +devs_SOURCES =
  sine_SOURCES = $(BINDIR)/sine.cxx
 --- portaudio-orig/bindings/cpp/build/gnu/Makefile.in	2006-05-25 02:34:26.000000000 -0700
-+++ portaudio/bindings/cpp/build/gnu/Makefile.in	2013-05-16 12:48:18.683283367 -0700
++++ portaudio/bindings/cpp/build/gnu/Makefile.in	2013-05-21 21:24:40.008815725 -0700
 @@ -47,9 +47,7 @@
         $(SRCDIR)/StreamParameters.o \
         $(SRCDIR)/System.o \
@@ -25,9 +25,19 @@
  #      $(SRCDIR)/AsioDeviceAdapter.o
  
  EXAMPLES = \
---- portaudio-orig/configure.in	2013-05-16 12:35:23.804800296 -0700
-+++ portaudio/configure.in	2013-05-16 12:50:28.493781614 -0700
-@@ -40,7 +44,7 @@
+--- portaudio-orig/bindings/cpp/configure.ac	2006-06-25 05:09:24.000000000 -0700
++++ portaudio/bindings/cpp/configure.ac	2013-05-21 21:26:52.698679925 -0700
+@@ -34,7 +34,6 @@
+ 
+ AC_PROG_CC
+ AC_PROG_CXX
+-AC_LIBTOOL_WIN32_DLL
+ AC_PROG_LIBTOOL
+ 
+ # Transfer these variables to the Makefile
+--- portaudio-orig/configure.in	2013-05-21 21:24:22.876638313 -0700
++++ portaudio/configure.in	2013-05-21 21:27:09.003752215 -0700
+@@ -40,7 +40,7 @@
              AS_HELP_STRING([--with-winapi],
                             [Select Windows API support (@<:@wmme|directx|asio|wasapi|wdmks@:>@@<:@,...@:>@) @<:@wmme@:>@]),
              [with_winapi=$withval], [with_winapi="wmme"])
@@ -36,7 +46,15 @@
       with_wmme=no
       with_directx=no
       with_asio=no
-@@ -198,7 +198,7 @@
+@@ -101,7 +101,6 @@
+ if [[ "$with_asio" = "yes" ] || [ "$enable_cxx" = "yes" ]] ; then
+        AC_PROG_CXX
+ fi
+-AC_LIBTOOL_WIN32_DLL
+ AC_PROG_LIBTOOL
+ AC_PROG_INSTALL
+ AC_PROG_LN_S
+@@ -198,7 +197,7 @@
  dnl Include directories needed by all implementations
  CFLAGS="$CFLAGS -I\$(top_srcdir)/include -I\$(top_srcdir)/src/common"
  
@@ -45,7 +63,7 @@
    darwin* )
          dnl Mac OS X configuration
  
-@@ -279,6 +279,9 @@
+@@ -279,6 +278,9 @@
    mingw* )
          dnl MingW configuration
  
@@ -55,7 +73,7 @@
          PADLL="portaudio.dll"
          THREAD_CFLAGS="-mthreads"
          SHARED_FLAGS="-shared"
-@@ -286,9 +289,9 @@
+@@ -286,9 +288,9 @@
  
          if [[ "x$with_directx" = "xyes" ]]; then
              DXDIR="$with_dxdir"
@@ -68,7 +86,7 @@
              #VC98="\"/c/Program Files/Microsoft Visual Studio/VC98/Include\""
              #CFLAGS="$CFLAGS -I$VC98 -DPA_NO_WMME -DPA_NO_ASIO"
              CFLAGS="$CFLAGS -I$DXDIR/include -UPA_USE_DS -DPA_USE_DS=1"
-@@ -296,9 +299,9 @@
+@@ -296,9 +298,9 @@
  
          if [[ "x$with_asio" = "xyes" ]]; then
              ASIODIR="$with_asiodir"
@@ -81,7 +99,7 @@
              CFLAGS="$CFLAGS -ffast-math -fomit-frame-pointer -I\$(top_srcdir)/src/hostapi/asio -I$ASIODIR/host/pc -I$ASIODIR/common -I$ASIODIR/host -UPA_USE_ASIO -DPA_USE_ASIO=1 -DWINDOWS"
  
              dnl Setting the windows version flags below resolves a conflict between Interlocked* 
-@@ -312,25 +315,24 @@
+@@ -312,25 +314,24 @@
  
          if [[ "x$with_wdmks" = "xyes" ]]; then
              DXDIR="$with_dxdir"

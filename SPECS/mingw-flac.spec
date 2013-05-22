@@ -1,13 +1,13 @@
 %{?mingw_package_header}
-	
+
 %global mingw_build_win32 1
 %global mingw_build_win64 1
 
 %global mingw_pkg_name flac
 
-Name:           mingw-flac
+Name:           mingw-%{mingw_pkg_name}
 Version:        1.2.1
-Release:        2%{?dist}
+Release:        10%{?dist}
 Summary:        Free Lossless Audio Codec Library
 
 License:        BSD 3-Clause
@@ -39,9 +39,7 @@ BuildRequires:  mingw64-binutils
 
 BuildRequires:  mingw32-libogg
 BuildRequires:  mingw64-libogg
-#BuildRequires:  mingw32-win_iconv
-#BuildRequires:  mingw64-win_iconv
-BuildRequires:  libtool, autoconf, automake
+BuildRequires:  libtool, autoconf, automake, gettext-devel
 
 Requires: pkgconfig
 
@@ -49,7 +47,7 @@ Requires: pkgconfig
 %description
 FLAC is an open source lossless audio codec developed by Josh Coalson.
 
-%package -n mingw32-%{mingw_pkg_name}
+%package -n     mingw32-%{mingw_pkg_name}
 Summary:        Free Lossless Audio Codec Library
 Group:          Development/Libraries
 
@@ -58,15 +56,15 @@ This package contains the library for FLAC (Free Lossless Audio Codec)
 developed by Josh Coalson.
 
 
-%package -n mingw32-flac++
+%package -n     mingw32-%{mingw_pkg_name}++
 Summary:        Free Lossless Audio Codec C++ Library
 Group:          Development/Libraries
 
-%description -n mingw32-flac++
+%description -n mingw32-%{mingw_pkg_name}++
 This package contains the C++ library for FLAC (Free Lossless Audio
 Codec) developed by Josh Coalson.
 
-%package -n mingw64-%{mingw_pkg_name}
+%package -n     mingw64-%{mingw_pkg_name}
 Summary:        Free Lossless Audio Codec Library
 Group:          Development/Libraries
 
@@ -76,15 +74,15 @@ This package contains the library for FLAC (Free Lossless Audio Codec)
 developed by Josh Coalson.
 
 
-%package -n mingw64-flac++
+%package -n     mingw64-%{mingw_pkg_name}++
 Summary:        Free Lossless Audio Codec C++ Library
 Group:          Development/Libraries
 
-%description -n mingw64-flac++
+%description -n mingw64-%{mingw_pkg_name}++
 This package contains the C++ library for FLAC (Free Lossless Audio
 Codec) developed by Josh Coalson.
 
-%package -n mingw32-%{mingw_pkg_name}-static
+%package -n     mingw32-%{mingw_pkg_name}-static
 Summary:        Static cross compiled version of the FLAC library
 Requires:       mingw32-%{mingw_pkg_name} = %{version}-%{release}
 Group:          Development/Libraries
@@ -92,7 +90,7 @@ Group:          Development/Libraries
 %description -n mingw32-%{mingw_pkg_name}-static
 Static cross compiled version of the FLAC library.
 
-%package -n mingw64-%{mingw_pkg_name}-static
+%package -n     mingw64-%{mingw_pkg_name}-static
 Summary:        Static cross compiled version of the FLAC library
 Requires:       mingw64-%{mingw_pkg_name} = %{version}-%{release}
 Group:          Development/Libraries
@@ -100,7 +98,7 @@ Group:          Development/Libraries
 %description -n mingw64-%{mingw_pkg_name}-static
 Static cross compiled version of the FLAC library.
 
-%package -n mingw32-%{mingw_pkg_name}++-static
+%package -n     mingw32-%{mingw_pkg_name}++-static
 Summary:        Static cross compiled version of the FLAC C++ library
 Requires:       mingw32-%{mingw_pkg_name} = %{version}-%{release}
 Group:          Development/Libraries
@@ -108,7 +106,7 @@ Group:          Development/Libraries
 %description -n mingw32-%{mingw_pkg_name}++-static
 Static cross compiled version of the FLAC C++ library.
 
-%package -n mingw64-%{mingw_pkg_name}++-static
+%package -n     mingw64-%{mingw_pkg_name}++-static
 Summary:        Static cross compiled version of the FLAC C++ library
 Requires:       mingw64-%{mingw_pkg_name} = %{version}-%{release}
 Group:          Development/Libraries
@@ -121,7 +119,7 @@ Static cross compiled version of the FLAC C++ library.
 
 
 %prep
-%setup -q -n flac-%{version}
+%setup -q -n %{mingw_pkg_name}-%{version}
 
 %patch0 -p1 -b .no_undefined
 ##%patch1 -p1 -b .asm
@@ -144,7 +142,7 @@ Static cross compiled version of the FLAC C++ library.
 
 
 %install
-%mingw_make_install DESTDIR=$RPM_BUILD_ROOT
+%mingw_make install DESTDIR=$RPM_BUILD_ROOT
 
 # Remove manpages which duplicate those in Fedora native.
 rm -rf $RPM_BUILD_ROOT%{mingw32_mandir}
@@ -164,7 +162,7 @@ find $RPM_BUILD_ROOT -name '*.la' -delete
 %{mingw32_libdir}/pkgconfig/flac.pc
 %{mingw32_datadir}/aclocal/libFLAC.m4 
 
-%files -n mingw32-flac++
+%files -n mingw32-%{mingw_pkg_name}++
 %{mingw32_bindir}/libFLAC++-6.dll
 %{mingw32_libdir}/libFLAC++.dll.a
 %{mingw32_includedir}/FLAC++
@@ -187,7 +185,7 @@ find $RPM_BUILD_ROOT -name '*.la' -delete
 %{mingw64_libdir}/pkgconfig/flac.pc
 %{mingw64_datadir}/aclocal/libFLAC.m4 
 
-%files -n mingw64-flac++
+%files -n mingw64-%{mingw_pkg_name}++
 %{mingw64_bindir}/libFLAC++-6.dll
 %{mingw64_libdir}/libFLAC++.dll.a
 %{mingw64_includedir}/FLAC++

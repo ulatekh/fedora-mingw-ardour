@@ -6,14 +6,13 @@
 %global mingw_pkg_name libsamplerate
 
 Summary:	MinGW Windows Sample rate conversion library for audio data
-Name:		mingw-libsamplerate
+Name:		mingw-%{mingw_pkg_name}
 Version:	0.1.8
-Release:	2%{?dist}
+Release:	3%{?dist}
 License:	GPLv2+
 Group:		System Environment/Libraries
 URL:		http://www.mega-nerd.com/SRC/
 Source0:	http://www.mega-nerd.com/SRC/libsamplerate-%{version}.tar.gz
-BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-buildroot-%(%{__id_u} -n)
 
 BuildArch:      noarch
 
@@ -40,7 +39,7 @@ factor of 12 and upsample by the same factor. The ratio of input and
 output sample rates can be a real number. The conversion ratio can
 also vary with time for speeding up and slowing down effects.
 
-%package -n mingw32-%{mingw_pkg_name}
+%package -n     mingw32-%{mingw_pkg_name}
 Summary:        %{summary}
 Group:          Development/Libraries
 
@@ -51,7 +50,7 @@ factor of 12 and upsample by the same factor. The ratio of input and
 output sample rates can be a real number. The conversion ratio can
 also vary with time for speeding up and slowing down effects.
 
-%package -n mingw64-%{mingw_pkg_name}
+%package -n     mingw64-%{mingw_pkg_name}
 Summary:        %{summary}
 Group:          Development/Libraries
 
@@ -62,7 +61,7 @@ factor of 12 and upsample by the same factor. The ratio of input and
 output sample rates can be a real number. The conversion ratio can
 also vary with time for speeding up and slowing down effects.
 
-%package -n mingw32-%{mingw_pkg_name}-static
+%package -n     mingw32-%{mingw_pkg_name}-static
 Summary:        Static MinGW Windows Samplerate library
 Requires:       mingw32-%{mingw_pkg_name} = %{version}-%{release}
 Group:          Development/Libraries
@@ -70,7 +69,7 @@ Group:          Development/Libraries
 %description -n mingw32-%{mingw_pkg_name}-static
 Static cross compiled version of the libsndfile library.
 
-%package -n mingw64-%{mingw_pkg_name}-static
+%package -n     mingw64-%{mingw_pkg_name}-static
 Summary:        Static MinGW Windows Samplerate library
 Requires:       mingw64-%{mingw_pkg_name} = %{version}-%{release}
 Group:          Development/Libraries
