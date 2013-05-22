@@ -37,15 +37,6 @@
  # Transfer these variables to the Makefile
 --- portaudio-orig/configure.in	2013-05-21 21:24:22.876638313 -0700
 +++ portaudio/configure.in	2013-05-21 21:27:09.003752215 -0700
-@@ -40,7 +40,7 @@
-             AS_HELP_STRING([--with-winapi],
-                            [Select Windows API support (@<:@wmme|directx|asio|wasapi|wdmks@:>@@<:@,...@:>@) @<:@wmme@:>@]),
-             [with_winapi=$withval], [with_winapi="wmme"])
--case "$target_os" in *mingw* | *cygwin*)
-+case "$target_os" in *cygwin*)
-      with_wmme=no
-      with_directx=no
-      with_asio=no
 @@ -101,7 +101,6 @@
  if [[ "$with_asio" = "yes" ] || [ "$enable_cxx" = "yes" ]] ; then
         AC_PROG_CXX
