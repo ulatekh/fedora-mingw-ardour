@@ -1,0 +1,192 @@
+--- phonon-4.6.0-orig/cmake/FindAutomoc4.cmake	2011-12-19 13:30:45.000000000 -0700
++++ phonon-4.6.0/cmake/FindAutomoc4.cmake	2013-05-18 20:01:26.237159255 -0700
+@@ -38,6 +38,11 @@
+ # Redistribution and use is allowed according to the terms of the BSD license.
+ # For details see the accompanying COPYING-CMAKE-SCRIPTS file.
+ 
++# Prepare for cross-compilation.
++if(HOST_PACKAGE_PATH)
++  SET (SAVE_FIND_ROOT_PATH_MODE_PACKAGE "${CMAKE_FIND_ROOT_PATH_MODE_PACKAGE}")
++  SET(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE "")
++endif(HOST_PACKAGE_PATH)
+ 
+ # check if we are inside KDESupport and automoc is enabled
+ if("${KDESupport_SOURCE_DIR}" STREQUAL "${CMAKE_SOURCE_DIR}")
+@@ -48,9 +53,15 @@
+    # use the new "config-mode" of cmake 2.6, which searches the installed Automoc4Config.cmake file
+    # see the man page for details
+    set(_Automoc4_FIND_QUIETLY ${Automoc4_FIND_QUIETLY})
+-   find_package(Automoc4 QUIET NO_MODULE)
++   find_package(Automoc4 QUIET NO_MODULE PATHS "${HOST_PACKAGE_PATH}")
+    set(Automoc4_FIND_QUIETLY ${_Automoc4_FIND_QUIETLY})
+ endif("${KDESupport_SOURCE_DIR}" STREQUAL "${CMAKE_SOURCE_DIR}")
+ 
+ include(FindPackageHandleStandardArgs)
+ find_package_handle_standard_args(Automoc4 "Did not find automoc4 (Automoc4Config.cmake, part of kdesupport)." AUTOMOC4_EXECUTABLE)
++
++# Revert from cross-compilation.
++if(HOST_PACKAGE_PATH)
++  SET (CMAKE_FIND_ROOT_PATH_MODE_PACKAGE "${SAVE_FIND_ROOT_PATH_MODE_PACKAGE}")
++  SET(SAVE_FIND_ROOT_PATH_MODE_PACKAGE "")
++endif(HOST_PACKAGE_PATH)
+--- phonon-4.6.0-orig/cmake/FindPhononInternal.cmake	2013-05-18 13:25:51.581606583 -0700
++++ phonon-4.6.0/cmake/FindPhononInternal.cmake	2013-05-18 20:01:26.253161289 -0700
+@@ -230,8 +230,7 @@
+ 
+    # gcc under Windows
+    if (MINGW)
+-      set (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--export-all-symbols -Wl,--disable-auto-import")
+-      set (CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -Wl,--export-all-symbols -Wl,--disable-auto-import")
++      set (CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -Wl,--export-all-symbols")
+ 
+    endif (MINGW)
+ 
+--- phonon-4.6.0-orig/cmake/FindQt4.cmake	2011-12-19 13:30:45.000000000 -0700
++++ phonon-4.6.0/cmake/FindQt4.cmake	2013-05-18 20:01:26.238159382 -0700
+@@ -1074,81 +1074,81 @@
+   
+   FIND_PROGRAM(QT_MOC_EXECUTABLE
+     NAMES moc-qt4 moc
+-    PATHS ${QT_BINARY_DIR}
++    PATHS ${QT_BINARY_DIR} ${HOST_PREFIX_PATH}
+     NO_DEFAULT_PATH
+     )
+ 
+   FIND_PROGRAM(QT_UIC_EXECUTABLE
+     NAMES uic-qt4 uic
+-    PATHS ${QT_BINARY_DIR}
++    PATHS ${QT_BINARY_DIR} ${HOST_PREFIX_PATH}
+     NO_DEFAULT_PATH
+     )
+ 
+   FIND_PROGRAM(QT_UIC3_EXECUTABLE
+     NAMES uic3
+-    PATHS ${QT_BINARY_DIR}
++    PATHS ${QT_BINARY_DIR} ${HOST_PREFIX_PATH}
+     NO_DEFAULT_PATH
+     )
+ 
+   FIND_PROGRAM(QT_RCC_EXECUTABLE 
+     NAMES rcc
+-    PATHS ${QT_BINARY_DIR}
++    PATHS ${QT_BINARY_DIR} ${HOST_PREFIX_PATH}
+     NO_DEFAULT_PATH
+     )
+ 
+ if(NOT WINCE)
+   FIND_PROGRAM(QT_DBUSCPP2XML_EXECUTABLE 
+     NAMES qdbuscpp2xml
+-    PATHS ${QT_BINARY_DIR}
++    PATHS ${QT_BINARY_DIR} ${HOST_PREFIX_PATH}
+     NO_DEFAULT_PATH
+     )
+ 
+   FIND_PROGRAM(QT_DBUSXML2CPP_EXECUTABLE 
+     NAMES qdbusxml2cpp
+-    PATHS ${QT_BINARY_DIR}
++    PATHS ${QT_BINARY_DIR} ${HOST_PREFIX_PATH}
+     NO_DEFAULT_PATH
+     )
+ else(NOT WINCE)
+   FIND_PROGRAM(QT_DBUSCPP2XML_EXECUTABLE 
+     NAMES qdbuscpp2xml
+-    PATHS ${HOST_BINDIR}
++    PATHS ${HOST_BINDIR} ${HOST_PREFIX_PATH}
+     NO_DEFAULT_PATH
+     )
+ 
+   FIND_PROGRAM(QT_DBUSXML2CPP_EXECUTABLE 
+     NAMES qdbusxml2cpp
+-    PATHS ${HOST_BINDIR}
++    PATHS ${HOST_BINDIR} ${HOST_PREFIX_PATH}
+     NO_DEFAULT_PATH
+     )
+ endif(NOT WINCE)
+ 
+   FIND_PROGRAM(QT_LUPDATE_EXECUTABLE
+     NAMES lupdate-qt4 lupdate
+-    PATHS ${QT_BINARY_DIR}
++    PATHS ${QT_BINARY_DIR} ${HOST_PREFIX_PATH}
+     NO_DEFAULT_PATH
+     )
+ 
+   FIND_PROGRAM(QT_LRELEASE_EXECUTABLE
+     NAMES lrelease-qt4 lrelease
+-    PATHS ${QT_BINARY_DIR}
++    PATHS ${QT_BINARY_DIR} ${HOST_PREFIX_PATH}
+     NO_DEFAULT_PATH
+     )
+ 
+   FIND_PROGRAM(QT_QCOLLECTIONGENERATOR_EXECUTABLE
+     NAMES qcollectiongenerator-qt4 qcollectiongenerator
+-    PATHS ${QT_BINARY_DIR}
++    PATHS ${QT_BINARY_DIR} ${HOST_PREFIX_PATH}
+     NO_DEFAULT_PATH
+     )
+ 
+   FIND_PROGRAM(QT_DESIGNER_EXECUTABLE
+     NAMES designer-qt4 designer
+-    PATHS ${QT_BINARY_DIR}
++    PATHS ${QT_BINARY_DIR} ${HOST_PREFIX_PATH}
+     NO_DEFAULT_PATH
+     )
+ 
+   FIND_PROGRAM(QT_LINGUIST_EXECUTABLE
+     NAMES linguist-qt4 linguist
+-    PATHS ${QT_BINARY_DIR}
++    PATHS ${QT_BINARY_DIR} ${HOST_PREFIX_PATH}
+     NO_DEFAULT_PATH
+     )
+ 
+--- phonon-4.6.0-orig/cmake/PhononMacros.cmake	2011-12-19 13:30:45.000000000 -0700
++++ phonon-4.6.0/cmake/PhononMacros.cmake	2013-05-18 20:01:26.238159382 -0700
+@@ -27,6 +27,7 @@
+     set(_srcs ${ARGN})
+     qt4_add_resources(_srcs ${_qrc_file})
+     automoc4_add_library(${_target} MODULE ${_global_add_executable_param} ${_srcs})
++	target_link_libraries (${_target} stdc++)
+ endmacro(phonon_add_designer_plugin)
+ 
+ macro (PHONON_ADD_UNIT_TEST _test_NAME)
+--- phonon-4.6.0-orig/CMakeLists.txt	2011-12-19 13:30:45.000000000 -0700
++++ phonon-4.6.0/CMakeLists.txt	2013-05-18 20:07:26.278918711 -0700
+@@ -138,7 +138,7 @@
+     add_subdirectory(demos)
+ endif(PHONON_BUILD_DEMOS)
+ 
+-if(NOT WIN32) # pkgconfig file
++if(MINGW OR NOT WIN32) # pkgconfig file
+ 
+     make_abs_install_path(ABS_LIB_INSTALL_DIR "${LIB_INSTALL_DIR}")
+     make_abs_install_path(ABS_INCLUDE_INSTALL_DIR "${INCLUDE_INSTALL_DIR}")
+--- phonon-4.6.0-orig/demos/phota/CMakeLists.txt	2011-12-19 13:30:45.000000000 -0700
++++ phonon-4.6.0/demos/phota/CMakeLists.txt	2013-05-18 20:01:26.239159509 -0700
+@@ -29,4 +29,4 @@
+ 
+ add_executable(phota ${phota_SRCS} ${phota_MOC_SRCS})
+ 
+-target_link_libraries(phota ${QT_LIBRARIES} phonon)
++target_link_libraries(phota ${QT_LIBRARIES} phonon stdc++)
+--- phonon-4.6.0-orig/phonon/CMakeLists.txt	2013-05-18 13:25:51.571605312 -0700
++++ phonon-4.6.0/phonon/CMakeLists.txt	2013-05-18 20:01:26.245160272 -0700
+@@ -98,6 +98,9 @@
+   target_link_libraries(phonon m)
+ endif (${CMAKE_SYSTEM_NAME} MATCHES "SunOS")
+ 
++# For RTTI.
++target_link_libraries(phonon stdc++)
++
+ set_target_properties(phonon PROPERTIES
+                              VERSION ${PHONON_LIB_VERSION}
+                              SOVERSION ${PHONON_LIB_SOVERSION}
+--- phonon-4.6.0-orig/phonon/experimental/CMakeLists.txt	2011-12-19 13:30:45.000000000 -0700
++++ phonon-4.6.0/phonon/experimental/CMakeLists.txt	2013-05-18 20:01:26.239159509 -0700
+@@ -20,7 +20,7 @@
+     ../abstractvideooutput_p.cpp
+    )
+ automoc4_add_library(phononexperimental SHARED ${phononexperimental_LIB_SRCS})
+-target_link_libraries(phononexperimental ${PHONON_LIBS})
++target_link_libraries(phononexperimental ${PHONON_LIBS} stdc++)
+ set_target_properties(phononexperimental PROPERTIES
+                                          VERSION ${PHONON_LIB_VERSION}
+                                          SOVERSION ${PHONON_LIB_SOVERSION}

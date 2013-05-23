@@ -1,0 +1,53 @@
+--- portmidi-orig/pm_common/CMakeLists.txt	2013-05-16 08:26:00.740071712 -0700
++++ portmidi/pm_common/CMakeLists.txt	2013-05-16 08:38:48.309625856 -0700
+@@ -118,11 +118,11 @@
+ set_target_properties(pmjni PROPERTIES EXECUTABLE_EXTENSION "jnilib")
+ 
+ # install the libraries (Linux and Mac OS X command line)
+-if(UNIX)
++if(UNIX OR MINGW)
+   INSTALL(TARGETS portmidi-static pmjni
+     LIBRARY DESTINATION ${LIB_INSTALL_DIR}
+     ARCHIVE DESTINATION ${LIB_INSTALL_DIR})
+ # .h files installed by pm_dylib/CMakeLists.txt, so don't need them here
+ #  INSTALL(FILES portmidi.h ../porttime/porttime.h
+ #    DESTINATION /usr/local/include)
+-endif(UNIX)
++endif(UNIX OR MINGW)
+--- portmidi-orig/pm_dylib/CMakeLists.txt	2013-05-16 08:26:00.741071840 -0700
++++ portmidi/pm_dylib/CMakeLists.txt	2013-05-16 08:41:40.932565344 -0700
+@@ -114,10 +114,10 @@
+ target_link_libraries(portmidi-dynamic ${PM_NEEDED_LIBS})
+ 
+ # install the libraries (Linux and Mac OS X command line)
+-if(UNIX)
++if(UNIX OR MINGW)
+   INSTALL(TARGETS portmidi-dynamic
+     LIBRARY DESTINATION ${LIB_INSTALL_DIR}
+     ARCHIVE DESTINATION ${LIB_INSTALL_DIR})
+   INSTALL(FILES ../pm_common/portmidi.h ../porttime/porttime.h
+     DESTINATION ${INCLUDE_INSTALL_DIR})
+-endif(UNIX)
++endif(UNIX OR MINGW)
+--- portmidi-orig/pm_java/CMakeLists.txt	2013-05-16 08:26:00.741071840 -0700
++++ portmidi/pm_java/CMakeLists.txt	2013-05-16 08:38:48.310625983 -0700
+@@ -1,9 +1,9 @@
+ # pm_java
+ 
+ if(UNIX)
+-  if(APPLE)
++  if(APPLE OR MINGW)
+     # java not dealt with in CMake -- see pm_mac/pm_mac.xcodeproj
+-  else(APPLE)
++  else(APPLE OR MINGW)
+     # linux
+     set(JPORTMIDICLASS JPortMidi.class JPortMidiException.class
+     		       JPortMidiApi.class)
+@@ -42,6 +42,6 @@
+       DESTINATION /usr/share/java)
+     INSTALL(PROGRAMS ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/pmdefaults
+       DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
+-  endif(APPLE)
++  endif(APPLE OR MINGW)
+ endif(UNIX)
+ # In windows, use pm_java/make.bat

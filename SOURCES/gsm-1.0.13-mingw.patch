@@ -1,0 +1,142 @@
+--- gsm-1.0-pl13-old/inc/config.h	2006-04-26 12:14:26.000000000 -0700
++++ gsm-1.0-pl13/inc/config.h	2013-05-15 21:03:32.897240496 -0700
+@@ -18,10 +18,6 @@
+ #define	HAS_ERRNO_DECL	1		/* errno.h declares errno	*/
+ 
+ #define	HAS_FSTAT 	1		/* fstat syscall		*/
+-#define	HAS_FCHMOD 	1		/* fchmod syscall		*/
+-#define	HAS_CHMOD 	1		/* chmod syscall		*/
+-#define	HAS_FCHOWN 	1		/* fchown syscall		*/
+-#define	HAS_CHOWN 	1		/* chown syscall		*/
+ /*efine	HAS__FSETMODE 	1		/* _fsetmode -- set file mode	*/
+ 
+ #define	HAS_STRING_H 	1		/* /usr/include/string.h 	*/
+--- gsm-1.0-pl13-old/Makefile	2013-05-15 20:17:25.557525849 -0700
++++ gsm-1.0-pl13/Makefile	2013-05-15 21:04:42.789123395 -0700
+@@ -47,10 +47,9 @@
+ # CC		= /usr/lang/acc
+ # CCFLAGS 	= -c -O
+ 
+-CC		= gcc -ansi -pedantic
+-CCFLAGS 	= -c $(RPM_OPT_FLAGS) -D_REENTRANT -DNeedFunctionPrototypes=1
++CCFLAGS 	= -ansi -pedantic -c $(RPM_OPT_FLAGS) -D_REENTRANT -fno-stack-protector -DNeedFunctionPrototypes=1
+ 
+-LD 		= $(CC)
++LD 		= $(CC) -ansi -pedantic
+ 
+ # LD		= gcc
+ # LDFLAGS 	=
+@@ -83,8 +82,8 @@
+ # this directory.
+ 
+ GSM_INSTALL_ROOT = $(INSTALL_ROOT)
+-GSM_INSTALL_LIB = $(GSM_INSTALL_ROOT)/lib
+-GSM_INSTALL_INC = $(GSM_INSTALL_ROOT)/inc
++#GSM_INSTALL_LIB = $(GSM_INSTALL_ROOT)/lib
++#GSM_INSTALL_INC = $(GSM_INSTALL_ROOT)/inc
+ GSM_INSTALL_MAN = $(GSM_INSTALL_ROOT)/share/man/man3
+ 
+ 
+@@ -93,23 +92,21 @@
+ # Leave TOAST_INSTALL_ROOT empty to not install the toast binaries outside
+ # of this directory.
+ 
+-TOAST_INSTALL_ROOT	  = $(INSTALL_ROOT)
+-TOAST_INSTALL_BIN = $(TOAST_INSTALL_ROOT)/bin
+-TOAST_INSTALL_MAN = $(TOAST_INSTALL_ROOT)/share/man/man1
++#TOAST_INSTALL_ROOT	  = $(INSTALL_ROOT)
++#TOAST_INSTALL_BIN = $(TOAST_INSTALL_ROOT)/bin
++#TOAST_INSTALL_MAN = $(TOAST_INSTALL_ROOT)/share/man/man1
+ 
+ #  Other tools
+ 
+ SHELL		= /bin/sh
+ LN		= ln -s
+ BASENAME 	= basename
+-AR		= ar
+ ARFLAGS		= cr
+ RMFLAGS		= -f
+ FIND		= find
+ COMPRESS 	= compress
+ COMPRESSFLAGS 	= 
+ # RANLIB 	= true
+-RANLIB	 	= ranlib
+ 
+ #
+ #    You shouldn't have to configure below this line if you're porting.
+@@ -144,11 +141,11 @@
+ # Targets
+ 
+ LIBGSM	= $(LIB)/libgsm.a
+-LIBGSMSO = $(LIB)/libgsm.so
++LIBGSMSO = $(LIB)/libgsm.dll
+ 
+-TOAST	= $(BIN)/toast
+-UNTOAST	= $(BIN)/untoast
+-TCAT	= $(BIN)/tcat
++TOAST	= $(BIN)/toast.exe
++UNTOAST	= $(BIN)/untoast.exe
++TCAT	= $(BIN)/tcat.exe
+ 
+ # Headers
+ 
+@@ -270,9 +267,9 @@
+ 		$(GSM_INSTALL_MAN)/gsm_print.3
+ 
+ TOAST_INSTALL_TARGETS =	\
+-		$(TOAST_INSTALL_BIN)/toast		\
+-		$(TOAST_INSTALL_BIN)/tcat		\
+-		$(TOAST_INSTALL_BIN)/untoast		\
++		$(TOAST_INSTALL_BIN)/toast.exe		\
++		$(TOAST_INSTALL_BIN)/tcat.exe		\
++		$(TOAST_INSTALL_BIN)/untoast.exe	\
+ 		$(TOAST_INSTALL_MAN)/toast.1
+ 
+ 
+@@ -305,9 +302,9 @@
+ # The basic API: libgsm
+ 
+ $(LIBGSMSO): $(LIB) $(GSM_OBJECTS)
+-			$(LD) -o $@.1.0.12 -shared -Xlinker -soname -Xlinker libgsm.so.1 $(GSM_OBJECTS) -lc
+-			ln -fs libgsm.so.1.0.12 lib/libgsm.so.1
+-			ln -fs libgsm.so.1.0.12 lib/libgsm.so
++			$(LD) -o libgsm.dll -shared -Xlinker -soname -Xlinker libgsm-1.dll $(GSM_OBJECTS) -lmsvcrt
++			ln libgsm.dll lib/libgsm.dll
++			ln libgsm.dll lib/libgsm-1.dll
+ 
+ $(LIBGSM):	$(LIB) $(GSM_OBJECTS)
+ 		-rm $(RMFLAGS) $(LIBGSM)
+@@ -321,11 +318,11 @@
+ 
+ $(UNTOAST):	$(BIN) $(TOAST)
+ 		-rm $(RMFLAGS) $(UNTOAST)
+-		$(LN) toast $(UNTOAST)
++		$(LN) toast.exe $(UNTOAST)
+ 
+ $(TCAT):	$(BIN) $(TOAST)
+ 		-rm $(RMFLAGS) $(TCAT)
+-		$(LN) toast $(TCAT)
++		$(LN) toast.exe $(TCAT)
+ 
+ 
+ # The local bin and lib directories
+@@ -359,16 +356,16 @@
+ 			rm $(RMFLAGS) $(TOAST_INSTALL_TARGETS);	\
+ 		fi
+ 
+-$(TOAST_INSTALL_BIN)/toast:	$(TOAST)
++$(TOAST_INSTALL_BIN)/toast.exe:	$(TOAST)
+ 		-rm $@
+ 		cp $(TOAST) $@
+ 		chmod 755 $@
+ 
+-$(TOAST_INSTALL_BIN)/untoast:	$(TOAST_INSTALL_BIN)/toast
++$(TOAST_INSTALL_BIN)/untoast.exe:	$(TOAST_INSTALL_BIN)/toast.exe
+ 		-rm $@
+ 		ln $? $@
+ 
+-$(TOAST_INSTALL_BIN)/tcat:	$(TOAST_INSTALL_BIN)/toast
++$(TOAST_INSTALL_BIN)/tcat.exe:	$(TOAST_INSTALL_BIN)/toast.exe
+ 		-rm $@
+ 		ln $? $@
+ 

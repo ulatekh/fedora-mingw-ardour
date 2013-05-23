@@ -1,0 +1,31 @@
+
+%mingwBT_kde4_version %((kde4-config --kde-version 2>/dev/null || echo 4.3.98) | cut -d' ' -f1 )
+#mingwBT_kde4_version %((kde4-config --version 2>/dev/null || echo "KDE: 4.3.98") | grep '^KDE' | sed -e 's/KDE[^:]*:[ ]*//g' | cut -d' ' -f1)
+
+# api = 2
+# initial try, including only items that vary from defaults
+#
+
+%mingwBT_kde4_build_tests -DKDE4_BUILD_TESTS:BOOL=OFF
+
+%cmake_mingwBT_kde4 \
+  QTDIR="%{mingwBT_qt4_prefix}" ; export QTDIR ; \
+  PATH="%{mingwBT_qt4_bindir}:$PATH" ; export PATH ; \
+  CFLAGS="${CFLAGS:-%optflags}" ; export CFLAGS ; \
+  CXXFLAGS="${CXXFLAGS:-%optflags}" ; export CXXFLAGS ; \
+  FFLAGS="${FFLAGS:-%optflags%{?_fmoddir: -I%_fmoddir}}" ; export FFLAGS ; \
+  %{?__global_ldflags:LDFLAGS="${LDFLAGS:-%__global_ldflags}" ; export LDFLAGS ;} \
+  %{__cmake} \\\
+    -DBUILD_SHARED_LIBS:BOOL=ON \\\
+    -DCMAKE_BUILD_TYPE=%{mingwBT_kde4_buildtype} \\\
+    -DCMAKE_INSTALL_PREFIX:PATH=%{mingwBT_kde4_prefix} \\\
+    -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \\\
+    -DDATA_INSTALL_DIR:PATH=%{mingwBT_kde4_appsdir} \\\
+    -DINCLUDE_INSTALL_DIR:PATH=%{mingwBT_kde4_includedir} \\\
+    -DLIB_INSTALL_DIR:PATH=%{mingwBT_kde4_libdir} \\\
+    %{?mingwBT_kde4_build_tests} \\\
+%if "%{?_lib}" == "lib64" \
+     %{?_cmake_lib_suffix64} \\\
+%endif \
+    -DLIBEXEC_INSTALL_DIR:PATH=%{mingwBT_kde4_libexecdir} \\\
+    -DSYSCONF_INSTALL_DIR:PATH=%{mingwBT_kde4_sysconfdir}
