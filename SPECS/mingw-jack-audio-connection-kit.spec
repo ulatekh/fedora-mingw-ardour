@@ -6,7 +6,7 @@
 %global mingw_pkg_name jack-audio-connection-kit
 
 Summary:       The Jack Audio Connection Kit
-Name:          mingw-jack-audio-connection-kit
+Name:          mingw-%{mingw_pkg_name}
 Version:       1.9.9.5
 Release:       1%{?dist}
 # The entire source (~500 files) is a mixture of these three licenses
@@ -18,8 +18,6 @@ Patch0:        jack-1.9.9-mingw-waf.patch
 patch1:        jack-1.9.9-SHGFP_CURRENT_TYPE-mingw.patch
 patch2:        jack-1.9.9-portaudio-no-asio.patch
 Patch3:        jack-1.9.9-example-clients.patch
-
-BuildRoot:     %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildArch:     noarch
 
@@ -35,7 +33,7 @@ BuildRequires: mingw64-binutils
 BuildRequires: mingw32-libsamplerate
 BuildRequires: mingw64-libsamplerate
 BuildRequires: mingw32-portaudio
-#BuildRequires: mingw64-portaudio
+BuildRequires: mingw64-portaudio
 # for examples
 BuildRequires: mingw32-pthreads
 BuildRequires: mingw64-pthreads
@@ -61,7 +59,7 @@ designed from the ground up to be suitable for professional audio
 work. This means that it focuses on two key areas: synchronous
 execution of all clients, and low latency operation.
 
-%package -n mingw32-%{mingw_pkg_name}
+%package -n     mingw32-%{mingw_pkg_name}
 Summary:        %{summary}
 Group:          Development/Libraries
 
@@ -79,7 +77,7 @@ work. This means that it focuses on two key areas: synchronous
 execution of all clients, and low latency operation.
 
 
-%package -n mingw64-%{mingw_pkg_name}
+%package -n     mingw64-%{mingw_pkg_name}
 Summary:        %{summary}
 Group:          Development/Libraries
 
@@ -97,7 +95,7 @@ work. This means that it focuses on two key areas: synchronous
 execution of all clients, and low latency operation.
 
 
-%package -n mingw32-%{mingw_pkg_name}-static
+%package -n     mingw32-%{mingw_pkg_name}-static
 Summary:        Static cross compiled version of the portaudio library
 Requires:       mingw32-%{mingw_pkg_name} = %{version}-%{release}
 Group:          Development/Libraries
@@ -105,7 +103,7 @@ Group:          Development/Libraries
 %description -n mingw32-%{mingw_pkg_name}-static
 Static cross compiled version of the portaudio library.
 
-%package -n mingw64-%{mingw_pkg_name}-static
+%package -n     mingw64-%{mingw_pkg_name}-static
 Summary:        Static cross compiled version of the portaudio library
 Requires:       mingw64-%{mingw_pkg_name} = %{version}-%{release}
 Group:          Development/Libraries
@@ -113,7 +111,7 @@ Group:          Development/Libraries
 %description -n mingw64-%{mingw_pkg_name}-static
 Static cross compiled version of the portaudio library.
 
-%package -n mingw32-%{mingw_pkg_name}-example-clients
+%package -n     mingw32-%{mingw_pkg_name}-example-clients
 Summary:       Example clients that use Jack 
 Group:         Applications/Multimedia
 Requires:      %{name} = %{version}-%{release}
@@ -121,7 +119,7 @@ Requires:      %{name} = %{version}-%{release}
 %description -n mingw32-%{mingw_pkg_name}-example-clients
 Small example clients that use the Jack Audio Connection Kit.
 
-%package -n mingw64-%{mingw_pkg_name}-example-clients
+%package -n     mingw64-%{mingw_pkg_name}-example-clients
 Summary:       Example clients that use Jack 
 Group:         Applications/Multimedia
 Requires:      %{name} = %{version}-%{release}
