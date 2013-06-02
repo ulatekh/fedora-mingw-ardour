@@ -1,186 +1,224 @@
 %{?mingw_package_header}
-	
-%global mingw_build_win32 1
-%global mingw_build_win64 1
 
 %global mingw_pkg_name fftw
+%global openmp 0
 
-Name:           mingw-fftw
-Version:        3.2.2
-Release:        2%{?dist}
-Summary:        A Fast Fourier Transform library
+Name:           mingw-%{mingw_pkg_name}
+Version:        3.3.3
+Release:        1%{?dist}
+Summary:        MinGW Fast Fourier Transform library
 Group:          System Environment/Libraries
 License:        GPLv2+
 URL:            http://www.fftw.org
 Source0:        http://www.fftw.org/fftw-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-
-BuildRequires: mingw32-filesystem >= 95
-BuildRequires: mingw64-filesystem >= 95
-BuildRequires: mingw32-gcc
-BuildRequires: mingw64-gcc
-BuildRequires: mingw32-binutils
-BuildRequires: mingw64-binutils
-
-# For check phase
-BuildRequires:  gcc-gfortran
-
-BuildRequires:  pkgconfig
-
-BuildArch: noarch
+BuildRequires:  mingw32-filesystem
+BuildRequires:  mingw64-filesystem
+BuildRequires:  mingw32-gcc
+BuildRequires:  mingw64-gcc
+BuildRequires:  mingw32-gcc-gfortran
+BuildRequires:  mingw64-gcc-gfortran
+BuildArch:      noarch
 
 
 %description
+This package contains the MinGW windows port of the FFTW library.
+
 FFTW is a C subroutine library for computing the Discrete Fourier
 Transform (DFT) in one or more dimensions, of both real and complex
 data, and of arbitrary input size.
 
+# Mingw32
 %package -n mingw32-%{mingw_pkg_name}
-Summary:        %{summary}
-Group:          Development/Libraries
+Summary:                %{summary}
 
 %description -n mingw32-%{mingw_pkg_name}
+This package contains the MinGW win32 port of the FFTW library.
+
 FFTW is a C subroutine library for computing the Discrete Fourier
 Transform (DFT) in one or more dimensions, of both real and complex
 data, and of arbitrary input size.
 
-%package -n mingw64-%{mingw_pkg_name}
-Summary:        %{summary}
-Group:          Development/Libraries
-
-%description -n mingw64-%{mingw_pkg_name}
-FFTW is a C subroutine library for computing the Discrete Fourier
-Transform (DFT) in one or more dimensions, of both real and complex
-data, and of arbitrary input size.
+This package contains cross-compiled libraries and development tools
+for Windows.
 
 %package -n mingw32-%{mingw_pkg_name}-static
-Summary:        Static cross compiled version of the FFTW library
-Requires:       mingw32-%{mingw_pkg_name} = %{version}-%{release}
-Group:          Development/Libraries
+Summary:                %{summary}
 
 %description -n mingw32-%{mingw_pkg_name}-static
-Static cross compiled version of the FFTW library.
+This package contains the MinGW win32 port of the FFTW library.
+
+FFTW is a C subroutine library for computing the Discrete Fourier
+Transform (DFT) in one or more dimensions, of both real and complex
+data, and of arbitrary input size.
+
+This package contains static cross-compiled library
+
+# Mingw64
+%package -n mingw64-%{mingw_pkg_name}
+Summary:                %{summary}
+
+%description -n mingw64-%{mingw_pkg_name}
+This package contains the MinGW win64 port of the FFTW library.
+
+FFTW is a C subroutine library for computing the Discrete Fourier
+Transform (DFT) in one or more dimensions, of both real and complex
+data, and of arbitrary input size.
+
+This package contains cross-compiled libraries and development tools
+for Windows.
 
 %package -n mingw64-%{mingw_pkg_name}-static
-Summary:        Static cross compiled version of the FFTW library
-Requires:       mingw64-%{mingw_pkg_name} = %{version}-%{release}
-Group:          Development/Libraries
+Summary:                %{summary}
 
 %description -n mingw64-%{mingw_pkg_name}-static
-Static cross compiled version of the FFTW library.
+This package contains the MinGW win64 port of the FFTW library.
 
+FFTW is a C subroutine library for computing the Discrete Fourier
+Transform (DFT) in one or more dimensions, of both real and complex
+data, and of arbitrary input size.
+
+This package contains static cross-compiled library
 
 %{?mingw_debug_package}
 
-
 %prep
-%setup -q -c %{name}-%{version}
-for dir in single double long; do
-  cp -a fftw-%{version} $dir
-done
-rm -rf fftw-%{version}
+%setup -q -n %{mingw_pkg_name}-%{version}
 
 
 %build
-# Configure uses g77 by default, if present on system
-export F77=gfortran
+#export F77=gfortran
 
-CONFIG_FLAGS="--enable-shared --enable-static --disable-dependency-tracking"
-pushd double
-        %mingw_configure $CONFIG_FLAGS
-#        sed -i 's|^hardcode_libdir_flag_spec=.*|hardcode_libdir_flag_spec=""|g' libtool
-#        sed -i 's|^runpath_var=LD_RUN_PATH|runpath_var=DIE_RPATH_DIE|g' libtool
-        %mingw_make %{?_smp_mflags}
-popd
-pushd single
-        %mingw_configure $CONFIG_FLAGS "--enable-single"
-#        sed -i 's|^hardcode_libdir_flag_spec=.*|hardcode_libdir_flag_spec=""|g' libtool
-#        sed -i 's|^runpath_var=LD_RUN_PATH|runpath_var=DIE_RPATH_DIE|g' libtool
-        %mingw_make %{?_smp_mflags}
-popd
-pushd long
-        %mingw_configure $CONFIG_FLAGS "--enable-long-double"
-#        sed -i 's|^hardcode_libdir_flag_spec=.*|hardcode_libdir_flag_spec=""|g' libtool
-#        sed -i 's|^runpath_var=LD_RUN_PATH|runpath_var=DIE_RPATH_DIE|g' libtool
-        %mingw_make %{?_smp_mflags}
-popd
+BASEFLAGS="--enable-shared --disable-dependency-tracking --disable-threads"
+%if %{openmp}
+BASEFLAGS="$BASEFLAGS --enable-openmp"
+%endif
 
+# Precisions to build
+prec_name[0]=single
+prec_name[1]=double
+prec_name[2]=long
+prec_name[3]=quad
+
+# Corresponding flags
+prec_flags[0]=--enable-single
+prec_flags[1]=--enable-double
+prec_flags[2]=--enable-long-double
+prec_flags[3]=--enable-quad-precision
+
+# Loop over precisions
+for((iprec=0;iprec<4;iprec++))
+do
+  export MINGW_BUILDDIR_SUFFIX=${prec_name[iprec]}
+  export MINGW_CONFIGURE_ARGS="${BASEFLAGS} ${prec_flags[iprec]}"
+  %{mingw_configure} 
+  #sed -i 's|^hardcode_libdir_flag_spec=.*|hardcode_libdir_flag_spec=""|g' libtool
+  #sed -i 's|^runpath_var=LD_RUN_PATH|runpath_var=DIE_RPATH_DIE|g' libtool
+  %{mingw_make} %{?_smp_mflags}
+done
 
 %install
+# Precisions to build
+prec_name[0]=single
+prec_name[1]=double
+prec_name[2]=long
+prec_name[3]=quad
 
-pushd double
-        %mingw_make_install DESTDIR=${RPM_BUILD_ROOT}
-        cp -a AUTHORS COPYING COPYRIGHT ChangeLog NEWS README* TODO ../
-        cp -a doc/ ../
-popd
-pushd single
-        %mingw_make_install DESTDIR=${RPM_BUILD_ROOT}
-popd
-pushd long
-        %mingw_make_install DESTDIR=${RPM_BUILD_ROOT}
-popd
+rm -rf %{buildroot}
+for((iprec=0;iprec<4;iprec++))
+do
+  export MINGW_BUILDDIR_SUFFIX=${prec_name[iprec]}
+ %{mingw_make} install DESTDIR=%{buildroot}
+done
+rm -f %{buildroot}%{mingw32_infodir}/dir
+rm -f %{buildroot}%{mingw64_infodir}/dir
+rm -f %{buildroot}%{mingw32_libdir}/*.la
+rm -f %{buildroot}%{mingw64_libdir}/*.la
 
-# no .la, please
-find $RPM_BUILD_ROOT%{mingw32_libdir} -name '*.la' -delete
-find $RPM_BUILD_ROOT%{mingw64_libdir} -name '*.la' -delete
+rm -f %{buildroot}%{mingw32_bindir}/fftw*-wisdom*
+rm -f %{buildroot}%{mingw64_bindir}/fftw*-wisdom*
+rm -rf %{buildroot}%{mingw32_infodir}
+rm -rf %{buildroot}%{mingw64_infodir}
+rm -rf %{buildroot}%{mingw32_mandir}
+rm -rf %{buildroot}%{mingw64_mandir}
 
-# Don't duplicate docs in the native package
-rm -rf ${RPM_BUILD_ROOT}%{mingw32_infodir}
-rm -rf ${RPM_BUILD_ROOT}%{mingw64_infodir}
-rm -rf ${RPM_BUILD_ROOT}%{mingw32_mandir}
-rm -rf ${RPM_BUILD_ROOT}%{mingw64_mandir}
+
+%clean
+rm -rf %{buildroot}
 
 %files -n mingw32-%{mingw_pkg_name}
+%defattr(-,root,root,-)
 %doc AUTHORS COPYING COPYRIGHT ChangeLog NEWS README* TODO
-%{mingw32_bindir}/fftw-wisdom-to-conf
-%{mingw32_bindir}/fftw-wisdom.exe
-%{mingw32_bindir}/fftwf-wisdom.exe
-%{mingw32_bindir}/fftwl-wisdom.exe
-%{mingw32_bindir}/libfftw3-3.dll
 %{mingw32_bindir}/libfftw3f-3.dll
+%{mingw32_bindir}/libfftw3-3.dll
 %{mingw32_bindir}/libfftw3l-3.dll
-%{mingw32_includedir}/fftw3.f
-%{mingw32_includedir}/fftw3.h
-%{mingw32_libdir}/libfftw3.dll.a
+#{mingw32_bindir}/libfftw3q-3.dll
 %{mingw32_libdir}/libfftw3f.dll.a
+%{mingw32_libdir}/libfftw3.dll.a
 %{mingw32_libdir}/libfftw3l.dll.a
-%{mingw32_libdir}/pkgconfig/fftw3.pc
+#{mingw32_libdir}/libfftw3q.dll.a
+%if %{openmp}
+%{mingw32_bindir}/libfftw3f_omp-3.dll
+%{mingw32_bindir}/libfftw3_omp-3.dll
+%{mingw32_bindir}/libfftw3l_omp-3.dll
+#{mingw32_bindir}/libfftw3q_omp-3.dll
+%{mingw32_libdir}/libfftw3f_omp.dll.a
+%{mingw32_libdir}/libfftw3_omp.dll.a
+%{mingw32_libdir}/libfftw3l_omp.dll.a
+#{mingw32_libdir}/libfftw3q_omp.dll.a
+%endif
+%{mingw32_includedir}/fftw3*
 %{mingw32_libdir}/pkgconfig/fftw3f.pc
+%{mingw32_libdir}/pkgconfig/fftw3.pc
 %{mingw32_libdir}/pkgconfig/fftw3l.pc
-
-%files -n mingw64-%{mingw_pkg_name}
-%doc AUTHORS COPYING COPYRIGHT ChangeLog NEWS README* TODO
-%{mingw64_bindir}/fftw-wisdom-to-conf
-%{mingw64_bindir}/fftw-wisdom.exe
-%{mingw64_bindir}/fftwf-wisdom.exe
-%{mingw64_bindir}/fftwl-wisdom.exe
-%{mingw64_bindir}/libfftw3-3.dll
-%{mingw64_bindir}/libfftw3f-3.dll
-%{mingw64_bindir}/libfftw3l-3.dll
-%{mingw64_includedir}/fftw3.f
-%{mingw64_includedir}/fftw3.h
-%{mingw64_libdir}/libfftw3.dll.a
-%{mingw64_libdir}/libfftw3f.dll.a
-%{mingw64_libdir}/libfftw3l.dll.a
-%{mingw64_libdir}/pkgconfig/fftw3.pc
-%{mingw64_libdir}/pkgconfig/fftw3f.pc
-%{mingw64_libdir}/pkgconfig/fftw3l.pc
+%{mingw32_libdir}/pkgconfig/fftw3q.pc
 
 %files -n mingw32-%{mingw_pkg_name}-static
-%{mingw32_libdir}/libfftw3.a
+%defattr(-,root,root,-)
 %{mingw32_libdir}/libfftw3f.a
+%{mingw32_libdir}/libfftw3.a
 %{mingw32_libdir}/libfftw3l.a
+%{mingw32_libdir}/libfftw3q.a
+
+%files -n mingw64-%{mingw_pkg_name}
+%defattr(-,root,root,-)
+%doc AUTHORS COPYING COPYRIGHT ChangeLog NEWS README* TODO
+%{mingw64_bindir}/libfftw3f-3.dll
+%{mingw64_bindir}/libfftw3-3.dll
+%{mingw64_bindir}/libfftw3l-3.dll
+#{mingw64_bindir}/libfftw3q-3.dll
+%{mingw64_libdir}/libfftw3f.dll.a
+%{mingw64_libdir}/libfftw3.dll.a
+%{mingw64_libdir}/libfftw3l.dll.a
+#{mingw64_libdir}/libfftw3q.dll.a
+%if %{openmp}
+%{mingw64_bindir}/libfftw3f_omp-3.dll
+%{mingw64_bindir}/libfftw3_omp-3.dll
+%{mingw64_bindir}/libfftw3l_omp-3.dll
+#{mingw64_bindir}/libfftw3q_omp-3.dll
+%{mingw64_libdir}/libfftw3f_omp.dll.a
+%{mingw64_libdir}/libfftw3_omp.dll.a
+%{mingw64_libdir}/libfftw3l_omp.dll.a
+#{mingw64_libdir}/libfftw3q_omp.dll.a
+%endif
+%{mingw64_includedir}/fftw3*
+%{mingw64_libdir}/pkgconfig/fftw3f.pc
+%{mingw64_libdir}/pkgconfig/fftw3.pc
+%{mingw64_libdir}/pkgconfig/fftw3l.pc
+%{mingw64_libdir}/pkgconfig/fftw3q.pc
 
 %files -n mingw64-%{mingw_pkg_name}-static
-%{mingw64_libdir}/libfftw3.a
+%defattr(-,root,root,-)
 %{mingw64_libdir}/libfftw3f.a
+%{mingw64_libdir}/libfftw3.a
 %{mingw64_libdir}/libfftw3l.a
-
+%{mingw64_libdir}/libfftw3q.a
 
 %changelog
-* Sun Jul 1 2012 Tim Mayberry <mojofunk@gmail.com> - 3.2.2-2
-- Update to Fedora 17 MinGW package guidelines
+* Sat Jan 19 2013 Thomas Sailer <t.sailer@alumni.ethz.ch> - 3.3.3-1
+- update to 3.3.3
 
-* Wed Dec 14 2011 Tim Mayberry <mojofunk@gmail.com> - 3.2.2-1
-- Initial mingw-w64 package
+* Sat Aug 25 2012 Thomas Sailer <t.sailer@alumni.ethz.ch> - 3.3.1-1
+- create from native spec file
+
