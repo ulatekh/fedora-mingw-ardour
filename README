@@ -84,10 +84,12 @@ kde-filesystem
 phonon : kde-filesystem
 fftw
 libchromaprint : fftw
+speex
+libtheora
+libshout : speex libtheora
 
 These are still to be done:
 
-qt : phonon
 vamp-plugin-sdk : phonon
 hss1394 : phonon
 

@@ -1,0 +1,33 @@
+--- libshout-2.2.2-orig/include/shout/shout.h.in	2005-06-27 14:33:21.000000000 -0700
++++ libshout-2.2.2/include/shout/shout.h.in	2013-06-03 16:28:38.374539119 -0700
+@@ -22,7 +22,7 @@
+ #define __LIBSHOUT_SHOUT_H__
+ 
+ #include <sys/types.h>
+-#ifdef WIN32
++#ifdef _MSC_VER
+ #include <os.h>
+ #endif
+ 
+--- libshout-2.2.2-orig/src/Makefile.am	2013-06-03 16:06:10.215194999 -0700
++++ libshout-2.2.2/src/Makefile.am	2013-06-03 16:28:38.374539119 -0700
+@@ -18,7 +18,7 @@
+ SUBDIRS = avl net timing httpp $(MAYBE_THREAD)
+ 
+ lib_LTLIBRARIES = libshout.la
+-libshout_la_LDFLAGS = -version-info 5:0:2
++libshout_la_LDFLAGS = -version-info 5:0:2 -no-undefined
+ 
+ EXTRA_DIST = theora.c speex.c
+ noinst_HEADERS = shout_ogg.h shout_private.h util.h
+--- libshout-2.2.2-orig/src/Makefile.in	2013-06-03 16:06:10.215194999 -0700
++++ libshout-2.2.2/src/Makefile.in	2013-06-03 16:32:05.661884274 -0700
+@@ -260,7 +260,7 @@
+ @HAVE_SPEEX_TRUE@MAYBE_SPEEX = speex.c
+ SUBDIRS = avl net timing httpp $(MAYBE_THREAD)
+ lib_LTLIBRARIES = libshout.la
+-libshout_la_LDFLAGS = -version-info 5:0:2
++libshout_la_LDFLAGS = -version-info 5:0:2 -no-undefined
+ EXTRA_DIST = theora.c speex.c
+ noinst_HEADERS = shout_ogg.h shout_private.h util.h
+ libshout_la_SOURCES = shout.c util.c ogg.c vorbis.c mp3.c $(MAYBE_THEORA) $(MAYBE_SPEEX)
