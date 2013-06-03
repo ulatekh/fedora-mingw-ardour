@@ -58,3 +58,42 @@ Optional
 - mingw*-gdb, for debugging
 
 - qemu-kvm to run virt images
+
+------------------------------------------------------------------------
+
+This repository also contains the dependencies needed to build the MS
+Windows version of Mixxx!  See http://www.mixxx.org/ for more info.
+(There was so much overlap between Ardour's dependencies and Mixxx's
+that it made sense to keep them in one repository.)
+
+Here are the MinGW packages to build, and the built packages they
+depend on.
+
+libmad
+portmidi
+protobuf
+libid3tag
+taglib
+flac
+gsm
+libsndfile : flac gsm libogg libvorbis
+libsamplerate : libsndfile
+portaudio
+jack-audio-connection-kit : libsamplerate portaudio
+kde-filesystem
+phonon : kde-filesystem
+fftw
+libchromaprint : fftw
+
+These are still to be done:
+
+qt : phonon
+vamp-plugin-sdk : phonon
+hss1394 : phonon
+
+As usual, yum-builddep should be run on the spec file before building,
+to bring in dependencies that are already in Fedora's repos (e.g. zlib,
+libogg, etc.)
+
+Note that Mixxx's build depends on protobuf-lite-static, so that'll have
+to be installed in addition to protobuf.
