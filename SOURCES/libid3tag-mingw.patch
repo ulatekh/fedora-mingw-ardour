@@ -1,0 +1,22 @@
+--- Makefile.am.orig	2013-06-03 18:13:22.451212950 -0700
++++ Makefile.am	2013-06-03 18:12:13.259419029 -0700
+@@ -90,7 +90,7 @@
+ 			frametype.gperf compat.gperf genre.dat.in  \
+ 			debug.c debug.h
+ 
+-libid3tag_la_LDFLAGS =	-version-info $(version_info)
++libid3tag_la_LDFLAGS =	-version-info $(version_info) -no-undefined
+ 
+ BUILT_SOURCES =		frametype.c compat.c genre.dat
+ 
+--- Makefile.in.orig	2013-06-03 18:12:10.419058033 -0700
++++ Makefile.in	2013-06-03 18:12:23.009658234 -0700
+@@ -235,7 +235,7 @@
+ 			frametype.gperf compat.gperf genre.dat.in  \
+ 			debug.c debug.h
+ 
+-libid3tag_la_LDFLAGS = -version-info $(version_info)
++libid3tag_la_LDFLAGS = -version-info $(version_info) -no-undefined
+ BUILT_SOURCES = frametype.c compat.c genre.dat
+ all: $(BUILT_SOURCES) config.h
+ 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
